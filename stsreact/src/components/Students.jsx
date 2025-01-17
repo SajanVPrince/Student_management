@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
 import axios from 'axios'
-import Add from './Add'
+import Add from "./Add"
+import './student.css'
 
-function Students(){
+
+function Student(){
     const [data,setData]=useState([])
     const [editing,setEditing]=useState(false)
-    const [editStudents,setEditStudents]=useState({id:'',roll_no:'',name:'',age:'',email:'',phone:''})
+    const [editStudents,setEditStudents]=useState({id:'',roll_no:'',name:'',age:'',email:'',ph:''})
     useEffect(()=>{
         axios.get('http://127.0.0.1:8000/api/task/').then(res=>{
             console.log(res.data);
@@ -13,15 +15,7 @@ function Students(){
         }).catch(error=>console.log(error.message))
     },[])
 
-    const deleteStudent = async (id) => {
-        try {
-            await axios.delete(`http://127.0.0.1:8000/api/task/${id}/`);
-            setData(data.filter((student) => student.id !== id));
-        } catch (error) {
-            console.error("Error deleting student:", error.message);
-        }
-    };
-
+    
     const edittask =(task)=>{
         setEditing(true)
         setEditStudents(task)
@@ -31,6 +25,13 @@ function Students(){
         axios.put(`http://127.0.0.1:8000/api/task/${id}/`,task).then(res=>{
             setData(data.map(prv=>(prv.id===id?res.data:prv)))
         }).catch(error=>console.log(error.message))
+    }
+
+    const deleteStd=(id)=>{
+        setEditing(false)
+        axios.delete(`http://127.0.0.1:8000/api/task/${id}/`).then((res)=>{
+            setData(data.filter((tasks)=>(tasks.id!==id)))
+        }).catch(error=>console.log(error.messsage))
     }
     return(
         <>
@@ -54,13 +55,14 @@ function Students(){
                         <td>{value.age}</td>
                         <td>{value.email}</td>
                         <td>{value.phone}</td>
-                        <td><button onClick={()=>{edittask(value)}} className="btn btn-outline-warning">Edit</button></td>
-                        <td><button onClick={()=>{}} className="btn btn-outline-danger">Delete</button></td>
+                        <td><button onClick={()=>{edittask(value)}} className="btn btn-outline-primary">Edit</button></td>
+                        <td><button onClick={()=>{deleteStd(value.id)}} className="btn btn-outline-danger">Delete</button></td>
                     </tr>
                 ))}
             </tbody>
         </table>
-        {editing ? <EditForm curTask={editStudents} updatetask={updateStudents}/>:null}
+        
+        {editing ? <EditForm curTask={editStudents} updatetask={updateStudents}/>:<Add/>}
         </div>
         </>
     )
@@ -79,7 +81,7 @@ const EditForm=({curTask,updatetask})=>{
     }
     return(
         <>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="form">
             <input type="number" name="roll_no" id="roll_no" value={task.roll_no} onChange={handleChange}/>
             <input type="text" name="name" id="name" value={task.name} onChange={handleChange}/>
             <input type="number" name="age" id="age" value={task.age} onChange={handleChange}/>
@@ -91,4 +93,4 @@ const EditForm=({curTask,updatetask})=>{
     )
 }
 
-export default Students
+export default Student
